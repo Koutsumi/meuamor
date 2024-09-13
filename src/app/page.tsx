@@ -1,101 +1,119 @@
-import Image from "next/image";
+"use client"; // This is a client component
+import { useEffect, useState } from "react";
+import ReactInputMask from 'react-input-mask';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [timeDifference, setTimeDifference] = useState({ days: 0, hours: 0 });
+  const [name, setName] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  useEffect(() => {
+    // Função para calcular a diferença de dias e horas
+    const calculateTimeDifference = () => {
+      const currentDate = new Date();
+      const targetDate = new Date('2024-06-02T00:00:00'); // Certifique-se de que é uma data válida
+
+      // Certificar-se de que a subtração retorna milissegundos (que é um number)
+      const timeDiff = currentDate.getTime() - targetDate.getTime();
+
+      // Converte milissegundos em dias e horas
+      const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hoursDiff = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+      // Atualiza o estado com a diferença calculada
+      setTimeDifference({ days: daysDiff, hours: hoursDiff });
+    };
+
+    // Chama a função quando o componente for montado
+    calculateTimeDifference();
+
+    // Atualiza a cada 1 hora para manter o tempo em tempo real
+    const interval = setInterval(calculateTimeDifference, 3600000);
+
+    // Limpa o intervalo quando o componente for desmontado
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await login(name, password);
+  };
+
+  const login = (name: string, password: string) => {
+    if(name.toLowerCase() === 'leticia desiderio'.toLowerCase() && password === '02/06/2024'){
+      setIsModalOpen(true);
+      setErrorMessage("");
+    } else {
+      setErrorMessage("Nome ou senha errada");
+    } 
+  }
+
+  return (
+    <main className="w-full flex flex-col items-center justify-center min-h-[100vh] bg-heart bg-contain bg-no-repeat bg-center">
+      <p className="bg-white bg-opacity-80 px-2 rounded-lg">{errorMessage}</p>
+      <section className="w-full max-w-[55%]  lg:max-w-[500px] flex flex-col items-center justify-center ">
+        <div className="w-full max-w-[90%] flex flex-col items-center justify-center">
+          
+          <form onSubmit={handleSubmit} action="" className="w-full flex flex-col items-center justify-center text-white">
+            <label htmlFor="" className="w-full flex flex-col items-start lg:items-center justify-center my-2">
+              <p className="w-full lg:w-[80%] text-left">Seu nome</p>
+              <input onChange={(e) => setName(e.target.value)} type="text" placeholder="Seu nome sobrenome" className="w-full lg:w-[80%] px-2 py-1 bg-red-200 rounded-lg bg-opacity-50 text-black placeholder-white"/>
+            </label>
+
+            <label htmlFor="" className="w-full flex flex-col items-start lg:items-center justify-center my-2">
+              <p className="w-full lg:w-[80%] text-left">Nosso dia</p>
+              <ReactInputMask
+                mask="99/99/9999"
+                value={password}
+                onChange={(e:any) => setPassword(e.target.value)}
+              >
+              {(inputProps: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>) => (
+                <input 
+                  {...inputProps} 
+                  type="text" 
+                  placeholder="Nossa data (dd/mm/aaaa)" 
+                  className="w-full lg:w-[80%] px-2 py-1 bg-red-200 rounded-lg bg-opacity-50 text-black placeholder-white" 
+                />
+              )}
+            </ReactInputMask>
+            </label>
+            <button type="submit" className="my-6 bg-white font-bold text-red-600 px-2 rounded-lg">ENTRAR</button>
+          </form>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {isModalOpen && (
+  <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="w-full max-w-[90%] lg:max-w-[500px] bg-red-300 bg-opacity-80 rounded-lg py-6 px-4 text-center shadow-lg">
+      <div className="flex flex-col items-center justify-center">
+        <h1 className="font-bold text-[1.5em]">❤️ {timeDifference.days} dias ❤️</h1>
+        <h2 className="font-bold text-[1.3em] mb-4">❤️ {timeDifference.hours} horas te amando ❤️</h2>
+        <p className="text-[1.1em] px-4 mb-2">Você me fez sentir a pessoa mais amada do mundo todos esses dias.</p>
+        <p className="text-[1.1em] px-4 mb-2">Obrigada por ser minha melhor companhia, minha inspiração e meu porto seguro.</p>
+        <p className="text-[1.2em] px-4 mb-2 font-bold">Te amo</p>
+        <p className="text-[1.1em] px-4 mb-2">Feliz dia do DEV ❤️</p>
+      </div>
+
+      <div className="flex flex-row items-center justify-between px-6 mt-4">
+        <button onClick={() => setIsModalOpen(false)} className="bg-white text-red-600 font-bold px-4 py-2 rounded-lg">
+          FECHAR
+        </button>
+        <p className="font-bold">Fernanda Baccarini</p>
+      </div>
     </div>
+  </section>
+)}
+
+
+
+
+    </main>
   );
 }
+function UseState<T>(arg0: boolean): [any, any] {
+  throw new Error("Function not implemented.");
+}
+
