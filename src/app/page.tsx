@@ -1,13 +1,14 @@
 "use client"; // This is a client component
 import React, { useEffect, useState } from 'react';
-import ReactInputMask from 'react-input-mask';
+import { useForm } from 'react-hook-form';
+import InputMask from 'react-input-mask';
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [timeDifference, setTimeDifference] = useState({ days: 0, hours: 0 });
-  const [name, setName] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  const { register, handleSubmit, setValue } = useForm();
 
   useEffect(() => {
     const calculateTimeDifference = () => {
@@ -27,12 +28,8 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await login(name, password);
-  };
-
-  const login = (name: string, password: string) => {
+  const onSubmit = (data: any) => {
+    const { name, password } = data;
     if (name.toLowerCase() === 'leticia desiderio'.toLowerCase() && password === '02/06/2024') {
       setIsModalOpen(true);
       setErrorMessage('');
@@ -46,11 +43,11 @@ export default function Home() {
       <p className="bg-white bg-opacity-80 px-2 rounded-lg">{errorMessage}</p>
       <section className="w-full max-w-[55%] lg:max-w-[500px] flex flex-col items-center justify-center">
         <div className="w-full max-w-[90%] flex flex-col items-center justify-center">
-          <form onSubmit={handleSubmit} className="w-full flex flex-col items-center justify-center text-white">
+          <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col items-center justify-center text-white">
             <label className="w-full flex flex-col items-start lg:items-center justify-center my-2">
               <p className="w-full lg:w-[80%] text-left">Seu nome</p>
               <input
-                onChange={(e) => setName(e.target.value)}
+                {...register('name')}
                 type="text"
                 placeholder="Seu nome sobrenome"
                 className="w-full lg:w-[80%] px-2 py-1 bg-red-200 rounded-lg bg-opacity-50 text-black placeholder-white"
@@ -59,20 +56,12 @@ export default function Home() {
 
             <div className="my-2 w-full flex flex-col items-start lg:items-center justify-center">
               <p className="w-full lg:w-[80%] text-left">Senha (Data)</p>
-              <ReactInputMask
+              <InputMask
                 mask="99/99/9999"
-                value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              >
-                {(inputProps) => (
-                  <input
-                    {...inputProps}
-                    type="text"
-                    placeholder="Nossa data (dd/mm/aaaa)"
-                    className="w-full lg:w-[80%] px-2 py-1 bg-red-200 rounded-lg bg-opacity-50 text-black placeholder-white"
-                  />
-                )}
-              </ReactInputMask>
+                {...register('password')}
+                className="w-full lg:w-[80%] px-2 py-1 bg-red-200 rounded-lg bg-opacity-50 text-black placeholder-white"
+                placeholder="Nossa data (dd/mm/aaaa)"
+              />
             </div>
 
             <button type="submit" className="my-6 bg-white font-bold text-red-600 px-4 py-2 rounded-lg">
