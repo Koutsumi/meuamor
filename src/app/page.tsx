@@ -2,13 +2,17 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import InputMask from 'react-input-mask';
+interface FormData {
+  name: string;
+  password: string;
+}
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [timeDifference, setTimeDifference] = useState({ days: 0, hours: 0 });
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const { register, handleSubmit, setValue } = useForm();
+  const { register, handleSubmit } = useForm<FormData>();
 
   useEffect(() => {
     const calculateTimeDifference = () => {
@@ -28,7 +32,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     const { name, password } = data;
     if (name.toLowerCase() === 'leticia desiderio'.toLowerCase() && password === '02/06/2024') {
       setIsModalOpen(true);
